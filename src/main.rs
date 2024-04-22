@@ -164,6 +164,8 @@ async fn main(_spawner: Spawner) {
 	info!("NeoPixel off");
 	data[0].r = 0; data[0].g = 0; data[0].b = 0;
 	ws2812.write(&data).await;
+
+	// =====
 	
         info!("led1 on!");
         led1.set_high();
@@ -200,6 +202,7 @@ async fn main(_spawner: Spawner) {
         led4.set_low();
         Timer::after_secs(1).await;
 
+	// =====
 
         info!("led1-4 on!");
         led1.set_high();
@@ -215,6 +218,45 @@ async fn main(_spawner: Spawner) {
         led4.set_low();
         Timer::after_secs(1).await;
 
+	// =====
+
+	// BLUE
+	data[0] = (0,0,255).into();
+	ws2812.write(&data).await;
+	Timer::after_secs(1).await;
+	// OFF
+	data[0] = (0,0,0).into();
+	ws2812.write(&data).await;
+	Timer::after_secs(1).await;
+
+	// GREEN
+	data[0] = (255,0,0).into();
+	ws2812.write(&data).await;
+	Timer::after_secs(1).await;
+	// OFF
+	data[0] = (0,0,0).into();
+	ws2812.write(&data).await;
+	Timer::after_secs(1).await;
+
+	// YELLOW
+	data[0] = (255,255,0).into();
+	ws2812.write(&data).await;
+	Timer::after_secs(1).await;
+	// OFF
+	data[0] = (0,0,0).into();
+	ws2812.write(&data).await;
+	Timer::after_secs(1).await;
+
+	// RED
+	data[0] = (0,255,0).into();
+	ws2812.write(&data).await;
+	Timer::after_secs(1).await;
+	// OFF
+	data[0] = (0,0,0).into();
+	ws2812.write(&data).await;
+	Timer::after_secs(1).await;
+
+	// =====
 
         for j in 0..(256 * 5) {
             debug!("New Colors:");
@@ -226,6 +268,7 @@ async fn main(_spawner: Spawner) {
 
             ticker.next().await;
         }
+
         Timer::after_secs(1).await;
     }
 }

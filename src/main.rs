@@ -170,34 +170,27 @@ async fn main(_spawner: Spawner) {
         info!("led1 on!");
         led1.set_high();
         Timer::after_secs(1).await;
-
         info!("led1 off!");
         led1.set_low();
         Timer::after_secs(1).await;
 
-
         info!("led2 on!");
         led2.set_high();
         Timer::after_secs(1).await;
-
         info!("led2 off!");
         led2.set_low();
         Timer::after_secs(1).await;
 
-
         info!("led3 on!");
         led3.set_high();
         Timer::after_secs(1).await;
-
         info!("led3 off!");
         led3.set_low();
         Timer::after_secs(1).await;
 
-
         info!("led4 on!");
         led4.set_high();
         Timer::after_secs(1).await;
-
         info!("led4 off!");
         led4.set_low();
         Timer::after_secs(1).await;
@@ -224,7 +217,6 @@ async fn main(_spawner: Spawner) {
 	data[0] = (0,0,255).into();
 	ws2812.write(&data).await;
 	Timer::after_secs(1).await;
-	// OFF
 	data[0] = (0,0,0).into();
 	ws2812.write(&data).await;
 	Timer::after_secs(1).await;
@@ -233,7 +225,6 @@ async fn main(_spawner: Spawner) {
 	data[0] = (255,0,0).into();
 	ws2812.write(&data).await;
 	Timer::after_secs(1).await;
-	// OFF
 	data[0] = (0,0,0).into();
 	ws2812.write(&data).await;
 	Timer::after_secs(1).await;
@@ -242,7 +233,6 @@ async fn main(_spawner: Spawner) {
 	data[0] = (255,255,0).into();
 	ws2812.write(&data).await;
 	Timer::after_secs(1).await;
-	// OFF
 	data[0] = (0,0,0).into();
 	ws2812.write(&data).await;
 	Timer::after_secs(1).await;
@@ -251,7 +241,14 @@ async fn main(_spawner: Spawner) {
 	data[0] = (0,255,0).into();
 	ws2812.write(&data).await;
 	Timer::after_secs(1).await;
-	// OFF
+	data[0] = (0,0,0).into();
+	ws2812.write(&data).await;
+	Timer::after_secs(1).await;
+
+	// WHITE
+	data[0] = (255,255,255).into();
+	ws2812.write(&data).await;
+	Timer::after_secs(1).await;
 	data[0] = (0,0,0).into();
 	ws2812.write(&data).await;
 	Timer::after_secs(1).await;

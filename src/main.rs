@@ -8,11 +8,12 @@
 
 use defmt::*;
 use embassy_executor::Spawner;
-use embassy_rp::gpio;
+use embassy_rp::gpio::{AnyPin, Level, Output, Pin};
 use embassy_rp::dma::{AnyChannel, Channel};
 use embassy_rp::peripherals::PIO0;
 use embassy_rp::pio::{
-    Common, Config, FifoJoin, Instance, InterruptHandler, Pio, PioPin, ShiftConfig, ShiftDirection, StateMachine,
+    Common, Config, FifoJoin, Instance, InterruptHandler, Pio, PioPin, ShiftConfig,
+    ShiftDirection, StateMachine
 };
 use embassy_rp::{bind_interrupts, clocks, into_ref, Peripheral, PeripheralRef};
 use embassy_time::{Duration, Ticker, Timer};
@@ -20,10 +21,10 @@ use embassy_time::{Duration, Ticker, Timer};
 use fixed::types::U24F8;
 use fixed_macro::fixed;
 use smart_leds::RGB8;
-use gpio::{Level, Output};
 
 use {defmt_rtt as _, panic_probe as _};
 
+// ================================================================================
 
 bind_interrupts!(struct Irqs {
     PIO0_IRQ_0 => InterruptHandler<PIO0>;
@@ -119,8 +120,10 @@ impl<'d, P: Instance, const S: usize, const N: usize> Ws2812<'d, P, S, N> {
     }
 }
 
-/// Input a value 0 to 255 to get a color value
-/// The colours are a transition r - g - b - back to r.
+// ================================================================================
+
+// Input a value 0 to 255 to get a color value
+// The colours are a transition r - g - b - back to r.
 fn wheel(mut wheel_pos: u8) -> RGB8 {
     wheel_pos = 255 - wheel_pos;
     if wheel_pos < 85 {
@@ -134,28 +137,44 @@ fn wheel(mut wheel_pos: u8) -> RGB8 {
     (wheel_pos * 3, 255 - wheel_pos * 3, 0).into()
 }
 
+// A pool size of 4 means you can spawn four instances of this task.
+// One for each status LED.
+#[embassy_executor::task(pool_size = 4)]
+async fn led_blink(pin: AnyPin) {
+    let mut led = Output::new(pin, Level::Low);
+
+    loop {
+	led.set_high();
+	Timer::after_millis(150).await;
+
+	led.set_low();
+	Timer::after_millis(150).await;
+    }
+}
 
 #[embassy_executor::main]
-async fn main(_spawner: Spawner) {
+async fn main(spawner: Spawner) {
     info!("Start");
+
     let p = embassy_rp::init(Default::default());
-
-    let mut led1 = Output::new(p.PIN_6, Level::Low);
-    let mut led2 = Output::new(p.PIN_7, Level::Low);
-    let mut led3 = Output::new(p.PIN_8, Level::Low);
-    let mut led4 = Output::new(p.PIN_9, Level::Low);
-
     let Pio { mut common, sm0, .. } = Pio::new(p.PIO0, Irqs);
+    let mut ws2812 = Ws2812::new(&mut common, sm0, p.DMA_CH0, p.PIN_15);
+
+    // =====
+
+    spawner.spawn(led_blink(p.PIN_6.degrade())).unwrap();
+    Timer::after_secs(1).await;
+    spawner.spawn(led_blink(p.PIN_7.degrade())).unwrap();
+    Timer::after_secs(1).await;
+    spawner.spawn(led_blink(p.PIN_8.degrade())).unwrap();
+    Timer::after_secs(1).await;
+    spawner.spawn(led_blink(p.PIN_9.degrade())).unwrap();
+    Timer::after_secs(1).await;
 
     // This is the number of leds in the string. Helpfully, the sparkfun thing plus and adafruit
     // feather boards for the 2040 both have one built in.
     const NUM_LEDS: usize = 1;
     let mut data = [RGB8::default(); NUM_LEDS];
-
-    // Common neopixel pins:
-    // Thing plus: 8
-    // Adafruit Feather: 16;  Adafruit Feather+RFM95: 4
-    let mut ws2812 = Ws2812::new(&mut common, sm0, p.DMA_CH0, p.PIN_15);
 
     // Loop forever making RGB values and pushing them out to the WS2812.
     let mut ticker = Ticker::every(Duration::from_millis(10));
@@ -167,52 +186,6 @@ async fn main(_spawner: Spawner) {
 
 	// =====
 	
-        info!("led1 on!");
-        led1.set_high();
-        Timer::after_secs(1).await;
-        info!("led1 off!");
-        led1.set_low();
-        Timer::after_secs(1).await;
-
-        info!("led2 on!");
-        led2.set_high();
-        Timer::after_secs(1).await;
-        info!("led2 off!");
-        led2.set_low();
-        Timer::after_secs(1).await;
-
-        info!("led3 on!");
-        led3.set_high();
-        Timer::after_secs(1).await;
-        info!("led3 off!");
-        led3.set_low();
-        Timer::after_secs(1).await;
-
-        info!("led4 on!");
-        led4.set_high();
-        Timer::after_secs(1).await;
-        info!("led4 off!");
-        led4.set_low();
-        Timer::after_secs(1).await;
-
-	// =====
-
-        info!("led1-4 on!");
-        led1.set_high();
-        led2.set_high();
-        led3.set_high();
-        led4.set_high();
-        Timer::after_secs(1).await;
-
-        info!("led1-4 off!");
-        led1.set_low();
-        led2.set_low();
-        led3.set_low();
-        led4.set_low();
-        Timer::after_secs(1).await;
-
-	// =====
-
 	// BLUE
 	data[0] = (0,0,255).into();
 	ws2812.write(&data).await;
@@ -229,8 +202,8 @@ async fn main(_spawner: Spawner) {
 	ws2812.write(&data).await;
 	Timer::after_secs(1).await;
 
-	// YELLOW
-	data[0] = (255,255,0).into();
+	// ORANGE
+	data[0] = (130,255,0).into();
 	ws2812.write(&data).await;
 	Timer::after_secs(1).await;
 	data[0] = (0,0,0).into();

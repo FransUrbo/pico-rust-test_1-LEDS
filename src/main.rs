@@ -181,49 +181,38 @@ async fn main(spawner: Spawner) {
 
     loop {
 	info!("NeoPixel off");
-	data[0].r = 0; data[0].g = 0; data[0].b = 0;
-	ws2812.write(&data).await;
+	ws2812.write(&[(0,0,0).into()]).await;
 
 	// =====
 	
 	// BLUE
-	data[0] = (0,0,255).into();
-	ws2812.write(&data).await;
+	ws2812.write(&[(0,0,255).into()]).await;
 	Timer::after_secs(1).await;
-	data[0] = (0,0,0).into();
-	ws2812.write(&data).await;
+	ws2812.write(&[(0,0,0).into()]).await;
 	Timer::after_secs(1).await;
 
 	// GREEN
-	data[0] = (255,0,0).into();
-	ws2812.write(&data).await;
+	ws2812.write(&[(255,0,0).into()]).await;
 	Timer::after_secs(1).await;
-	data[0] = (0,0,0).into();
-	ws2812.write(&data).await;
+	ws2812.write(&[(0,0,0).into()]).await;
 	Timer::after_secs(1).await;
 
 	// ORANGE
-	data[0] = (130,255,0).into();
-	ws2812.write(&data).await;
+	ws2812.write(&[(130,255,0).into()]).await;
 	Timer::after_secs(1).await;
-	data[0] = (0,0,0).into();
-	ws2812.write(&data).await;
+	ws2812.write(&[(0,0,0).into()]).await;
 	Timer::after_secs(1).await;
 
 	// RED
-	data[0] = (0,255,0).into();
-	ws2812.write(&data).await;
+	ws2812.write(&[(0,255,0).into()]).await;
 	Timer::after_secs(1).await;
-	data[0] = (0,0,0).into();
-	ws2812.write(&data).await;
+	ws2812.write(&[(0,0,0).into()]).await;
 	Timer::after_secs(1).await;
 
 	// WHITE
-	data[0] = (255,255,255).into();
-	ws2812.write(&data).await;
+	ws2812.write(&[(255,255,255).into()]).await;
 	Timer::after_secs(1).await;
-	data[0] = (0,0,0).into();
-	ws2812.write(&data).await;
+	ws2812.write(&[(0,0,0).into()]).await;
 	Timer::after_secs(1).await;
 
 	// =====

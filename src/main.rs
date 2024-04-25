@@ -5,7 +5,7 @@
 #![no_std]
 #![no_main]
 
-use defmt::*;
+use defmt::info;
 
 use embassy_executor::Spawner;
 use embassy_rp::gpio::{AnyPin, Level, Output, Pin};
@@ -79,11 +79,19 @@ async fn main(spawner: Spawner) {
     info!("Start");
 
     let p = embassy_rp::init(Default::default());
+
+    // =====
+    // Initialize the NeoPixel LED.
     let Pio { mut common, sm0, .. } = Pio::new(p.PIO0, Irqs);
     let mut ws2812 = Ws2812::new(&mut common, sm0, p.DMA_CH0, p.PIN_15);
 
-    // =====
+    // This is the number of leds in the string. Helpfully, the sparkfun thing plus and adafruit
+    // feather boards for the 2040 both have one built in.
+    const NUM_LEDS: usize = 1;
+    let mut data = [RGB8::default(); NUM_LEDS];
 
+    // =====
+    // Spawn a LED blinker task, one per LED.
     spawner.spawn(led_blink(CHANNEL1.receiver(), p.PIN_6.degrade())).unwrap();
     Timer::after_secs(1).await;
     spawner.spawn(led_blink(CHANNEL2.receiver(), p.PIN_7.degrade())).unwrap();
@@ -93,14 +101,8 @@ async fn main(spawner: Spawner) {
     spawner.spawn(led_blink(CHANNEL4.receiver(), p.PIN_9.degrade())).unwrap();
     Timer::after_secs(1).await;
 
-    // This is the number of leds in the string. Helpfully, the sparkfun thing plus and adafruit
-    // feather boards for the 2040 both have one built in.
-    const NUM_LEDS: usize = 1;
-    let mut data = [RGB8::default(); NUM_LEDS];
-
     // Loop forever making RGB values and pushing them out to the WS2812.
     let mut ticker = Ticker::every(Duration::from_millis(10));
-
     loop {
 	info!("NeoPixel off");
 	ws2812.write(&[(0,0,0).into()]).await;
@@ -149,10 +151,10 @@ async fn main(spawner: Spawner) {
 	// =====
 
         for j in 0..(256 * 5) {
-            debug!("New Colors:");
+            info!("New Colors:");
             for i in 0..NUM_LEDS {
                 data[i] = wheel((((i * 256) as u16 / NUM_LEDS as u16 + j as u16) & 255) as u8);
-                debug!("R: {} G: {} B: {}", data[i].r, data[i].g, data[i].b);
+                info!("R: {} G: {} B: {}", data[i].r, data[i].g, data[i].b);
             }
             ws2812.write(&data).await;
 

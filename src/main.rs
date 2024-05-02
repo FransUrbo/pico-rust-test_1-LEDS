@@ -16,8 +16,7 @@ use embassy_time::{Duration, Ticker, Timer};
 use embassy_sync::blocking_mutex::raw::ThreadModeRawMutex;
 use embassy_sync::channel::{Channel as SyncChannel, Receiver};
 
-pub mod ws2812;
-use crate::ws2812::Ws2812;
+use ws2812;
 
 use smart_leds::RGB8;
 use {defmt_rtt as _, panic_probe as _};
@@ -83,7 +82,7 @@ async fn main(spawner: Spawner) {
     // =====
     // Initialize the NeoPixel LED.
     let Pio { mut common, sm0, .. } = Pio::new(p.PIO0, Irqs);
-    let mut ws2812 = Ws2812::new(&mut common, sm0, p.DMA_CH0, p.PIN_15);
+    let mut ws2812 = ws2812::Ws2812::new(&mut common, sm0, p.DMA_CH0, p.PIN_15);
 
     // This is the number of leds in the string. Helpfully, the sparkfun thing plus and adafruit
     // feather boards for the 2040 both have one built in.

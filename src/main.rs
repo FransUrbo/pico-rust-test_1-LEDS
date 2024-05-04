@@ -130,7 +130,7 @@ async fn main(spawner: Spawner) {
 	Timer::after_secs(1).await;
 
 	// ORANGE
-	ws2812.write(&[(255,130,0).into()]).await;
+	ws2812.write(&[(255,40,0).into()]).await;
 	Timer::after_secs(1).await;
 	ws2812.write(&[(0,0,0).into()]).await;
 	Timer::after_secs(1).await;
